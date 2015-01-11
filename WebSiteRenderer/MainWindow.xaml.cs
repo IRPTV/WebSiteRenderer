@@ -68,7 +68,7 @@ namespace WebSiteRenderer
 
             if (!procSnap.Start())
             {
-                return;
+               // return;
             }
         }
         private void procSnap_Exited(object sender, EventArgs e)
@@ -100,10 +100,10 @@ namespace WebSiteRenderer
             proc.StartInfo.RedirectStandardOutput = true;
             proc.StartInfo.RedirectStandardError = true;
             proc.Exited += proc_Exited;
-
+          
             if (!proc.Start())
             {
-                return;
+               // return;
             }
             StreamReader reader = proc.StandardOutput;
             string line;
@@ -115,12 +115,14 @@ namespace WebSiteRenderer
                );
             }
             proc.Close();
+            Dispatcher.Invoke(
+                    new UpdateUiCallback(this.UpdateUi),
+                    new object[] { "" });
 
         }
         void proc_Exited(object sender, EventArgs e)
         {
-            this.Dispatcher.Invoke(
-                   new HideWaitingCallback(this.HideWaiting), new object());
+            
         }
         
         public delegate void UpdateTextCallback(string message);
@@ -129,8 +131,10 @@ namespace WebSiteRenderer
             rtxtLog.Document.Blocks.Clear();
             rtxtLog.AppendText(message);
         }
-        public delegate void HideWaitingCallback();
-        private void HideWaiting()
+    
+        
+        public delegate void UpdateUiCallback(string message);
+        private void UpdateUi(string message)
         {
             prWaiting.IsActive = false;
             rtxtLog.Document.Blocks.Clear();
@@ -140,12 +144,9 @@ namespace WebSiteRenderer
             {
                 string StaticDestFileName = ConfigurationSettings.AppSettings["ScheduleDestFileName"].ToString().Trim();
                 File.Copy(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4", StaticDestFileName, true);
-
             }
             catch
-            {
-
-            }
+            {}
             dispatcherTimerJob.Start();
         }
         protected void Deleter()
