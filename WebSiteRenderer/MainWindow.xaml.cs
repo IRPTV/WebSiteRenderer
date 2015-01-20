@@ -13,6 +13,7 @@ namespace WebSiteRenderer
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        int ImgIndx = 0;
         string DateTimeStr = "";
         System.Windows.Threading.DispatcherTimer dispatcherTimerJob = new System.Windows.Threading.DispatcherTimer();
         public MainWindow()
@@ -48,16 +49,23 @@ namespace WebSiteRenderer
             Deleter();
             prWaiting.IsActive = true;
             btnStart.Content = "Started";
-            SnapShot();
+
+            string[] urls = ConfigurationSettings.AppSettings["WebUrl"].ToString().Trim().Split('#');
+
+            for (int i = 0; i < urls.Length; i++)
+            {
+                SnapShot((i + 1).ToString(), urls[i]);
+            }
+          
 
         }
-        protected void SnapShot()
+        protected void SnapShot(string index,string Url)
         {
             Process procSnap = new Process();
             procSnap.StartInfo.FileName = "\"" + ConfigurationSettings.AppSettings["SnapEngine"].ToString().Trim() + "\"";
-            procSnap.StartInfo.Arguments = " --url=" + "\"" + ConfigurationSettings.AppSettings["WebUrl"].ToString().Trim() + "\"" +
+            procSnap.StartInfo.Arguments = " --url=" + "\"" + Url+ "\"" +
                                        " --min-width=1652  --min-height=2898 --delay=2000 " +
-                                       " --out=" + "\"" + ConfigurationSettings.AppSettings["Thumbnail"].ToString().Trim() + "\"";
+                                       " --out=" + "\"" + ConfigurationSettings.AppSettings["Thumbnail"].ToString().Trim().Replace("1",index) + "\"";
             procSnap.StartInfo.RedirectStandardError = true;
             procSnap.StartInfo.UseShellExecute = false;
             procSnap.StartInfo.CreateNoWindow = true;
@@ -73,10 +81,14 @@ namespace WebSiteRenderer
         }
         private void procSnap_Exited(object sender, EventArgs e)
         {
-            string img = ConfigurationSettings.AppSettings["Thumbnail"].ToString().Trim();
-            File.Copy(img, img.Replace("01", "02"), true);
-            File.Copy(img, img.Replace("01", "03"), true);
-            Renderer();
+            ImgIndx++;
+            //string img = ConfigurationSettings.AppSettings["Thumbnail"].ToString().Trim();
+            //File.Copy(img, img.Replace("01", "02"), true);
+            //File.Copy(img, img.Replace("01", "03"), true);
+            if (ImgIndx == 2)
+            {
+                Renderer();
+            }
 
         }
         protected void Renderer()
@@ -142,6 +154,7 @@ namespace WebSiteRenderer
             btnStart.Content = "START";
             try
             {
+                ImgIndx = 0;
                 string StaticDestFileName = ConfigurationSettings.AppSettings["ScheduleDestFileName"].ToString().Trim();
                 File.Copy(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4", StaticDestFileName, true);
             }
