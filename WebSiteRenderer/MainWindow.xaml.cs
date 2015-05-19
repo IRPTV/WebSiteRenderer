@@ -85,9 +85,9 @@ namespace WebSiteRenderer
             //string img = ConfigurationSettings.AppSettings["Thumbnail"].ToString().Trim();
             //File.Copy(img, img.Replace("01", "02"), true);
             //File.Copy(img, img.Replace("01", "03"), true);
-            if (ImgIndx == 2)
+            if (ImgIndx == 3)
             {
-                Renderer();
+               Renderer();
             }
 
         }
